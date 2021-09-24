@@ -1,0 +1,36 @@
+:local(.card-container){
+    min-height: 300px;
+    width: 500px;
+    padding: 1rem;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    box-shadow: 0 0 5px 5px black;
+    border-radius: 15px;
+}
+
+:local(.avatar){
+    height: 45px;
+    width: 45px;
+    margin-inline-end: 1rem;
+}
+
+:local(.info-container) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+:local(.info-container) h2{
+    font-size: 1.2rem;
+}
+
+:local(.contributor){
+    padding-left: .25rem;
+}
+
+:local(.github-button){
+    margin-block-end: 1.67em;
+}

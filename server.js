@@ -8,6 +8,7 @@ const port = process.env.PORT;
 
 const { log } = console;
 const MongoClient = require("mongodb").MongoClient;
+const { ObjectId } = require("mongodb");
 const mongoURI = `mongodb+srv://${process.env.USERNAME}:${process.env.PASS}@cluster0.mcoai.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const mongoClient = new MongoClient(mongoURI, {
   useNewUrlParser: true,
@@ -34,6 +35,19 @@ app.post("/create-entry", async (req, res) => {
     console.error("error creating db entry\n", e);
     res.status(500);
   }
+});
+
+app.get('/repo/:id', async (req, res)=>{
+    try{
+        const id = req.params.id;
+        const collection = await mongoClient.db("superchat").collection("repos");
+        const result = await collection.findOne({ _id: ObjectId(id)});
+        res.send(result);
+
+    } catch(e){
+        console.error("error getting db entry\n", e);
+        res.status(500);
+    }
 });
 
 app.listen(port, () => {
