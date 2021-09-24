@@ -16,7 +16,7 @@ const mongoClient = new MongoClient(mongoURI, {
 });
 
 app.use(express.json());
-app.use(express.static(staticFilesFolder));
+app.use(express.static(path.join(__dirname, staticFilesFolder)));
 
 app.post("/create-entry", async (req, res) => {
   log("create-entry req.body", req.body);
