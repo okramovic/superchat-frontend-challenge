@@ -4,7 +4,7 @@ const express = require("express"),
   path = require("path"),
   app = express();
 const port = process.env.PORT;
-// staticFilesFolder = 'build',
+const staticFilesFolder = 'build';
 
 const { log } = console;
 const MongoClient = require("mongodb").MongoClient;
@@ -16,7 +16,7 @@ const mongoClient = new MongoClient(mongoURI, {
 });
 
 app.use(express.json());
-// app.use(express.static(staticFilesFolder));
+app.use(express.static(staticFilesFolder));
 
 app.post("/create-entry", async (req, res) => {
   log("create-entry req.body", req.body);
@@ -48,6 +48,10 @@ app.get('/repo/:id', async (req, res)=>{
         console.error("error getting db entry\n", e);
         res.status(500);
     }
+});
+
+app.get('/', (_, res)=>{
+  res.sendFile(path.join(__dirname, staticFilesFolder, 'index.html')); 
 });
 
 app.listen(port, () => {
