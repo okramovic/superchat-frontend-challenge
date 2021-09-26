@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { baseAppURL } from "../Form/Form";
 import styles from "./RepoShowcase.module.css";
 
 interface RepoCustomizationData {
@@ -10,7 +9,7 @@ interface RepoCustomizationData {
   _id: string;
 }
 
-interface ghRepoResponse {
+interface GithubRepoResponse {
   stargazers_count: number;
   name: string;
   description: string;
@@ -23,27 +22,29 @@ interface CardData extends RepoCustomizationData {
   description: string;
 }
 
+interface Contributor {
+  login: string;
+  contributions: number;
+}
+
 export const RepoShowcase = () => {
   const [data, setData] = useState(null as CardData | null);
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const mongoResponse = await fetch(
-          baseAppURL + "/repo/" + getRepoIdFromURL(),
-          {
-            method: "GET",
-            headers: {
-              Accept: "*",
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const mongoResponse = await fetch("/repo/" + getRepoIdFromURL(), {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }).then((res) => res.json());
 
-        const data = (await mongoResponse.json()) as RepoCustomizationData;
-        const { username, repository, avatar, color } = data;
+        const { username, repository, avatar, color } =
+          mongoResponse as RepoCustomizationData;
 
-        const githubResponse = await fetch(
+        const githubResponseAsPromise = fetch(
           `https://api.github.com/repos/${username}/${repository}`,
           {
             method: "GET",
@@ -52,16 +53,21 @@ export const RepoShowcase = () => {
               "Content-Type": "application/json",
             },
           }
-        );
-        const githubData = (await githubResponse.json()) as ghRepoResponse;
-        const { stargazers_count, description, name } = githubData;
+        ).then((res) => res.json());
 
-        const contributors = await fetch(
+        const contributorsAsPromise = fetch(
           `https://api.github.com/repos/${username}/${repository}/contributors`
         ).then((res) => res.json());
-        const contributorNames = (
-          contributors as { login: string; contributions: number }[]
-        )
+
+        const [githubResponse, contributors] = await Promise.all([
+          githubResponseAsPromise,
+          contributorsAsPromise,
+        ]);
+
+        const { stargazers_count, description, name } =
+          githubResponse as GithubRepoResponse;
+
+        const contributorNames = (contributors as Contributor[])
           .sort((a, b) => a.contributions - b.contributions)
           .filter((_, i) => i < 10)
           .map(({ login }) => login);
@@ -119,15 +125,18 @@ export const RepoShowcase = () => {
 
           <p>
             Top contributors:
-            {data.contributorNames.map((name) => (
-              <span key={name} className={styles.contributor}>
-                {name}
-              </span>
-            ))}
+            <ul className={styles["contributors-list"]}>
+              {data.contributorNames.map((name) => (
+                <li key={name} className={styles.contributor}>
+                  {name}
+                </li>
+              ))}
+            </ul>
           </p>
 
           <a
             className={"github-button " + styles["github-button"]}
+            style={{ color }}
             href={`https://github.com/${data.username}/${data.repoTitle}`}
             data-color-scheme="no-preference: light; light: light; dark: dark;"
             data-size="large"

@@ -27,6 +27,12 @@
     font-size: 1.2rem;
 }
 
+:local(.contributors-list){
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 :local(.contributor){
     padding-left: .25rem;
 }
