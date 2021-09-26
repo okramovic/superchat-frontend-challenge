@@ -3,10 +3,9 @@ require("dotenv").config();
 const express = require("express"),
   path = require("path"),
   app = express();
-const port = process.env.PORT;
-const staticFilesFolder = 'build';
+const port = process.env.PORT || 3001;
+const staticFilesFolder = "build";
 
-const { log } = console;
 const MongoClient = require("mongodb").MongoClient;
 const { ObjectId } = require("mongodb");
 const mongoURI = `mongodb+srv://${process.env.USERNAME}:${process.env.PASS}@cluster0.mcoai.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -19,7 +18,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, staticFilesFolder)));
 
 app.post("/create-entry", async (req, res) => {
-  log("create-entry req.body", req.body);
   try {
     const collection = await mongoClient.db("superchat").collection("repos");
     const result = await collection.insertOne(req.body);
@@ -37,21 +35,24 @@ app.post("/create-entry", async (req, res) => {
   }
 });
 
-app.get('/repo/:id', async (req, res)=>{
-    try{
-        const id = req.params.id;
-        const collection = await mongoClient.db("superchat").collection("repos");
-        const result = await collection.findOne({ _id: ObjectId(id)});
-        res.send(result);
-
-    } catch(e){
-        console.error("error getting db entry\n", e);
-        res.status(500);
-    }
+app.get("/repo/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const collection = await mongoClient.db("superchat").collection("repos");
+    const result = await collection.findOne({ _id: ObjectId(id) });
+    res.send(result);
+  } catch (e) {
+    console.error("error getting db entry\n", e);
+    res.status(500);
+  }
 });
 
-app.get('/', (_, res)=>{
-  res.sendFile(path.join(__dirname, staticFilesFolder, 'index.html')); 
+app.get("/r/:id", async (req, res) => {
+  res.sendFile(path.join(__dirname, staticFilesFolder, "index.html"));
+});
+
+app.get("/*", (_, res) => {
+  res.sendFile(path.join(__dirname, staticFilesFolder, "index.html"));
 });
 
 app.listen(port, () => {
